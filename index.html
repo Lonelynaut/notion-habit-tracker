@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 16px;
+            margin: 0;
+            transition: all 0.2s ease;
+        }
+
+        /* Light mode (default) */
+        body {
+            background: #ffffff;
+            color: #24292f;
+        }
+
+        /* Dark mode detection */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #0d1117;
+                color: #e6edf3;
+            }
+        }
+
+        .habit-tracker {
+            max-width: 1000px;
+            margin: 0 auto;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s ease;
+        }
+
+        /* Light mode tracker */
+        .habit-tracker {
+            background: #ffffff;
+            border: 1px solid #d1d9e0;
+        }
+
+        /* Dark mode tracker */
+        @media (prefers-color-scheme: dark) {
+            .habit-tracker {
+                background: #161b22;
+                border: 1px solid #30363d;
+            }
+        }
+
+        .settings-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            cursor: pointer;
+            padding: 6px 0;
+            border-bottom: 1px solid;
+            opacity: 0.6;
+            transition: all 0.2s ease;
+        }
+
+        .settings-header:hover {
+            opacity: 1;
+        }
+
+        /* Light mode settings header */
+        .settings-header {
+            border-bottom-color: #d1d9e0;
+        }
+
+        /* Dark mode settings header */
+        @media (prefers-color-scheme: dark) {
+            .settings-header {
+                border-bottom-color: #30363d;
+            }
+        }
+
+        .settings-title {
+            font-size: 13px;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            opacity: 0.8;
+        }
+
+        .settings-toggle {
+            font-size: 11px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .settings-header:hover .settings-toggle {
+            opacity: 0.7;
+        }
+
+        .settings-content {
+            overflow: hidden;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .settings-content.collapsed {
+            max-height: 0;
+            margin-bottom: 0;
+        }
+
+        .settings-content.expanded {
+            max-height: 200px;
+        }
+
+        .settings {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 16px 0;
+        }
+
+        .setting-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .setting-group label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .setting-group input, .setting-group select {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            border: 1px solid;
+            transition: all 0.2s ease;
+        }
+
+        /* Light mode inputs */
+        .setting-group input, .setting-group select {
+            background: #ffffff;
+            border-color: #d1d9e0;
+            color: #24292f;
+        }
+
+        .setting-group input:focus, .setting-group select:focus {
+            outline: none;
+            border-color: #0969da;
+        }
+
+        /* Dark mode inputs */
+        @media (prefers-color-scheme: dark) {
+            .setting-group input, .setting-group select {
+                background: #21262d;
+                border-color: #30363d;
+                color: #e6edf3;
+            }
+
+            .setting-group input:focus, .setting-group select:focus {
+                border-color: #58a6ff;
+            }
+        }
+
+        .setting-group input[type="color"] {
+            width: 40px;
+            height: 32px;
+            padding: 2px;
+            cursor: pointer;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            padding-top: 12px;
+            border-top: 1px solid;
+        }
+
+        /* Light mode actions */
+        .actions {
+            border-top-color: #d1d9e0;
+        }
+
+        /* Dark mode actions */
+        @media (prefers-color-scheme: dark) {
+            .actions {
+                border-top-color: #30363d;
+            }
+        }
+
+        .habit-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .graph-container {
+            margin-bottom: 24px;
+        }
+
+        .graph-header {
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-end;
+            margin-bottom: 8px;
+        }
+
+        .year-label {
+            font-size: 14px;
+            font-weight: 500;
+            margin-right: 16px;
+            margin-bottom: 2px;
+            flex-shrink: 0;
+        }
+
+        /* Light mode year label */
+        .year-label {
+            color: #656d76;
+        }
+
+        /* Dark mode year label */
+        @media (prefers-color-scheme: dark) {
+            .year-label {
+                color: #7d8590;
+            }
+        }
+
+        .months {
+            display: grid;
+            grid-template-columns: repeat(53, 12px);
+            gap: 2px;
+            flex-grow: 1;
+        }
+
+        .month {
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* Light mode months */
+        .month {
+            color: #656d76;
+        }
+
+        /* Dark mode months */
+        @media (prefers-color-scheme: dark) {
+            .month {
+                color: #7d8590;
+            }
+        }
+
+        .graph {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 8px;
+            align-items: start;
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-rows: repeat(7, 1fr);
+            gap: 2px;
+            padding-top: 2px;
+        }
+
+        .weekday {
+            font-size: 12px;
+            height: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Light mode weekdays */
+        .weekday {
+            color: #656d76;
+        }
+
+        /* Dark mode weekdays */
+        @media (prefers-color-scheme: dark) {
+            .weekday {
+                color: #7d8590;
+            }
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-rows: repeat(7, 12px);
+            grid-auto-flow: column;
+            gap: 2px;
+        }
+
+        .day {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.1s ease;
+        }
+
+        .day:hover {
+            stroke-width: 1px;
+            transform: scale(1.1);
+        }
+
+        /* Light mode day hover */
+        .day:hover {
+            stroke: #24292f;
+        }
+
+        /* Dark mode day hover */
+        @media (prefers-color-scheme: dark) {
+            .day:hover {
+                stroke: #e6edf3;
+            }
+        }
+
+        .day.completed {
+            opacity: 1;
+        }
+
+        .day.empty {
+            opacity: 0.1;
+        }
+
+        .tooltip {
+            position: fixed;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            white-space: nowrap;
+            display: none;
+            border: 1px solid;
+        }
+
+        /* Light mode tooltip */
+        .tooltip {
+            background: #ffffff;
+            border-color: #d1d9e0;
+            color: #24292f;
+        }
+
+        /* Dark mode tooltip */
+        @media (prefers-color-scheme: dark) {
+            .tooltip {
+                background: #21262d;
+                border-color: #30363d;
+                color: #e6edf3;
+            }
+        }
+
+        .stats {
+            margin-top: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .stats-grid {
+            display: flex;
+            gap: 24px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+        }
+
+        .stat-text {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .stat-value {
+            font-weight: 600;
+        }
+
+        /* Light mode stats */
+        .stat-value {
+            color: #0969da;
+        }
+
+        /* Dark mode stats */
+        @media (prefers-color-scheme: dark) {
+            .stat-value {
+                color: #58a6ff;
+            }
+        }
+
+        .stat-label {
+            opacity: 0.8;
+        }
+
+        .context-menu {
+            position: fixed;
+            border-radius: 6px;
+            padding: 4px 0;
+            z-index: 1001;
+            display: none;
+            min-width: 120px;
+            border: 1px solid;
+        }
+
+        /* Light mode context menu */
+        .context-menu {
+            background: #ffffff;
+            border-color: #d1d9e0;
+        }
+
+        /* Dark mode context menu */
+        @media (prefers-color-scheme: dark) {
+            .context-menu {
+                background: #21262d;
+                border-color: #30363d;
+            }
+        }
+
+        .context-menu-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.1s ease;
+        }
+
+        /* Light mode context menu item */
+        .context-menu-item:hover {
+            background: #f6f8fa;
+        }
+
+        /* Dark mode context menu item */
+        @media (prefers-color-scheme: dark) {
+            .context-menu-item:hover {
+                background: #30363d;
+            }
+        }
+
+        .btn {
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 6px 12px;
+            border: 1px solid;
+            transition: all 0.1s ease;
+        }
+
+        /* Light mode buttons */
+        .btn {
+            background: #f6f8fa;
+            border-color: #d1d9e0;
+            color: #24292f;
+        }
+
+        .btn:hover {
+            background: #f3f4f6;
+            border-color: #bcc4ce;
+        }
+
+        .btn.primary {
+            background: #1f883d;
+            border-color: #1f883d;
+            color: #ffffff;
+        }
+
+        .btn.primary:hover {
+            background: #1a7f37;
+            border-color: #1a7f37;
+        }
+
+        /* Dark mode buttons */
+        @media (prefers-color-scheme: dark) {
+            .btn {
+                background: #21262d;
+                border-color: #30363d;
+                color: #e6edf3;
+            }
+
+            .btn:hover {
+                background: #30363d;
+                border-color: #8b949e;
+            }
+
+            .btn.primary {
+                background: #238636;
+                border-color: #2ea043;
+                color: #ffffff;
+            }
+
+            .btn.primary:hover {
+                background: #2ea043;
+                border-color: #2ea043;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="habit-tracker">
+        <div class="header">
+            <div class="habit-title" id="habitTitle">Daily Exercise</div>
+            <div class="settings-wrapper">
+                <div class="settings-header" onclick="toggleSettings()">
+                    <div class="settings-title">
+                        ⚙️ Settings
+                        <span class="settings-toggle" id="settingsToggle">Click to expand</span>
+                    </div>
+                </div>
+
+                <div class="settings-content collapsed" id="settingsContent">
+                    <div class="settings">
+                        <div class="setting-group">
+                            <label for="habitName">Habit Name:</label>
+                            <input type="text" id="habitName" value="Daily Exercise" placeholder="Enter habit name">
+                        </div>
+                        <div class="setting-group">
+                            <label for="habitColor">Color:</label>
+                            <input type="color" id="habitColor" value="#f85149">
+                        </div>
+                        <div class="setting-group">
+                            <label for="habitYear">Year:</label>
+                            <select id="habitYear">
+                                <option value="2024">2024</option>
+                                <option value="2025" selected>2025</option>
+                                <option value="2026">2026</option>
+                                <option value="2027">2027</option>
+                                <option value="2028">2028</option>
+                                <option value="2029">2029</option>
+                                <option value="2030">2030</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn primary" onclick="exportData()">Export Data</button>
+                        <button class="btn" onclick="importData()">Import Data</button>
+                        <button class="btn" onclick="clearData()">Clear All</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="graph-container">
+            <div class="graph-header">
+                <div class="year-label" id="yearLabel">2025</div>
+                <div class="months" id="monthsContainer">
+                    <div class="month">Jan</div>
+                    <div class="month">Feb</div>
+                    <div class="month">Mar</div>
+                    <div class="month">Apr</div>
+                    <div class="month">May</div>
+                    <div class="month">Jun</div>
+                    <div class="month">Jul</div>
+                    <div class="month">Aug</div>
+                    <div class="month">Sep</div>
+                    <div class="month">Oct</div>
+                    <div class="month">Nov</div>
+                    <div class="month">Dec</div>
+                </div>
+            </div>
+
+            <div class="graph">
+                <div class="weekdays">
+                    <div class="weekday"></div>
+                    <div class="weekday">Mon</div>
+                    <div class="weekday"></div>
+                    <div class="weekday">Wed</div>
+                    <div class="weekday"></div>
+                    <div class="weekday">Fri</div>
+                    <div class="weekday"></div>
+                </div>
+                <div class="days-grid" id="daysGrid"></div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stats-grid">
+                <div class="stat-text">
+                    <span class="stat-label">Total days:</span>
+                    <span class="stat-value" id="totalDays">0/365</span>
+                </div>
+                <div class="stat-text">
+                    <span class="stat-label">Longest streak:</span>
+                    <span class="stat-value" id="longestStreak">0 days</span>
+                </div>
+                <div class="stat-text">
+                    <span class="stat-label">Weekly average:</span>
+                    <span class="stat-value" id="weeklyAverage">0</span>
+                </div>
+                <div class="stat-text">
+                    <span class="stat-label">This month:</span>
+                    <span class="stat-value" id="currentMonth">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+    <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item" onclick="undoDay()">Undo</div>
+    </div>
+
+    <script>
+        class HabitTracker {
+            constructor() {
+                this.year = 2025;
+                this.habitName = 'Daily Exercise';
+                this.color = '#f85149';
+                this.completedDays = new Set();
+                this.currentContextDay = null;
+                
+                this.init();
+                this.loadData();
+            }
+
+            init() {
+                this.generateCalendar();
+                this.setupEventListeners();
+                this.updateStats();
+            }
+
+            setupEventListeners() {
+                // Settings
+                document.getElementById('habitName').addEventListener('input', (e) => {
+                    this.habitName = e.target.value;
+                    document.getElementById('habitTitle').textContent = this.habitName;
+                    this.saveData();
+                });
+
+                document.getElementById('habitColor').addEventListener('input', (e) => {
+                    this.color = e.target.value;
+                    this.updateColors();
+                    this.saveData();
+                });
+
+                document.getElementById('habitYear').addEventListener('change', (e) => {
+                    this.year = parseInt(e.target.value);
+                    this.completedDays.clear();
+                    this.generateCalendar();
+                    this.updateStats();
+                    this.saveData();
+                });
+
+                // Context menu
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.settings-wrapper')) {
+                        const settingsContent = document.getElementById('settingsContent');
+                        const settingsToggle = document.getElementById('settingsToggle');
+                        if (!settingsContent.classList.contains('collapsed')) {
+                            settingsContent.classList.remove('expanded');
+                            settingsContent.classList.add('collapsed');
+                            settingsToggle.textContent = 'Click to expand';
+                        }
+                    }
+                    document.getElementById('contextMenu').style.display = 'none';
+                });
+
+                document.addEventListener('contextmenu', (e) => {
+                    if (!e.target.classList.contains('day')) {
+                        document.getElementById('contextMenu').style.display = 'none';
+                    }
+                });
+            }
+
+            generateCalendar() {
+                const daysGrid = document.getElementById('daysGrid');
+                const yearLabel = document.getElementById('yearLabel');
+                const habitTitle = document.getElementById('habitTitle');
+                const monthsContainer = document.getElementById('monthsContainer');
+                
+                yearLabel.textContent = this.year;
+                habitTitle.textContent = this.habitName;
+                daysGrid.innerHTML = '';
+                monthsContainer.innerHTML = '';
+
+                const startDate = new Date(this.year, 0, 1);
+                const endDate = new Date(this.year, 11, 31);
+                const startDay = startDate.getDay(); // 0 = Sunday
+                
+                // Calculate total weeks needed
+                const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+                const totalWeeks = Math.ceil((totalDays + startDay) / 7);
+                
+                // Create month labels positioned correctly
+                const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                
+                for (let month = 0; month < 12; month++) {
+                    const monthStart = new Date(this.year, month, 1);
+                    const daysFromYearStart = Math.floor((monthStart - startDate) / (1000 * 60 * 60 * 24));
+                    const weekOfMonth = Math.floor((daysFromYearStart + startDay) / 7);
+                    
+                    const monthLabel = document.createElement('div');
+                    monthLabel.className = 'month';
+                    monthLabel.textContent = monthLabels[month];
+                    monthLabel.style.gridColumn = `${weekOfMonth + 1} / span 4`;
+                    monthsContainer.appendChild(monthLabel);
+                }
+                
+                // Update grids to match weeks
+                monthsContainer.style.gridTemplateColumns = `repeat(${totalWeeks}, 12px)`;
+                daysGrid.style.gridTemplateColumns = `repeat(${totalWeeks}, 12px)`;
+
+                // Create all grid positions first (week by week, day by day)
+                const gridPositions = [];
+                for (let week = 0; week < totalWeeks; week++) {
+                    for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+                        gridPositions.push({ week, dayOfWeek });
+                    }
+                }
+                
+                // Fill with actual dates
+                const currentDate = new Date(startDate);
+                let gridIndex = startDay; // Start at the correct day of week
+                
+                // Add empty cells for days before the year starts
+                for (let i = 0; i < startDay; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'day empty';
+                    emptyDay.style.opacity = '0';
+                    daysGrid.appendChild(emptyDay);
+                }
+                
+                // Add all days of the year
+                while (currentDate <= endDate) {
+                    const dayElement = this.createDayElement(new Date(currentDate));
+                    daysGrid.appendChild(dayElement);
+                    currentDate.setDate(currentDate.getDate() + 1);
+                    gridIndex++;
+                }
+                
+                // Fill remaining empty cells
+                const totalCells = totalWeeks * 7;
+                while (gridIndex < totalCells) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'day empty';
+                    emptyDay.style.opacity = '0';
+                    daysGrid.appendChild(emptyDay);
+                    gridIndex++;
+                }
+
+                this.updateColors();
+            }
+
+            createDayElement(date) {
+                const day = document.createElement('div');
+                day.className = 'day';
+                day.dataset.date = date.toISOString().split('T')[0];
+                
+                const isCompleted = this.completedDays.has(day.dataset.date);
+                day.classList.toggle('completed', isCompleted);
+                day.classList.toggle('empty', !isCompleted);
+
+                // Click handler
+                day.addEventListener('click', () => {
+                    this.toggleDay(day.dataset.date);
+                    this.updateDayAppearance(day);
+                    this.updateStats();
+                    this.saveData();
+                });
+
+                // Right click handler
+                day.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    if (this.completedDays.has(day.dataset.date)) {
+                        this.showContextMenu(e.pageX, e.pageY, day.dataset.date);
+                    }
+                });
+
+                // Hover handler
+                day.addEventListener('mouseenter', (e) => {
+                    this.showTooltip(e, date);
+                });
+
+                day.addEventListener('mouseleave', () => {
+                    this.hideTooltip();
+                });
+
+                return day;
+            }
+
+            toggleDay(dateStr) {
+                if (this.completedDays.has(dateStr)) {
+                    this.completedDays.delete(dateStr);
+                } else {
+                    this.completedDays.add(dateStr);
+                }
+            }
+
+            updateDayAppearance(dayElement) {
+                const isCompleted = this.completedDays.has(dayElement.dataset.date);
+                dayElement.classList.toggle('completed', isCompleted);
+                dayElement.classList.toggle('empty', !isCompleted);
+            }
+
+            updateColors() {
+                const style = document.createElement('style');
+                style.textContent = `
+                    .day.completed {
+                        background-color: ${this.color};
+                        border: 1px solid ${this.color};
+                    }
+                    .day.empty {
+                        background-color: transparent;
+                        border: 1px solid ${this.color};
+                    }
+                `;
+                
+                // Remove existing style
+                const existingStyle = document.querySelector('style[data-habit-colors]');
+                if (existingStyle) {
+                    existingStyle.remove();
+                }
+                
+                style.setAttribute('data-habit-colors', 'true');
+                document.head.appendChild(style);
+            }
+
+            showTooltip(event, date) {
+                const tooltip = document.getElementById('tooltip');
+                const dayOfMonth = date.getDate();
+                const monthName = date.toLocaleDateString('en-US', { month: 'long' });
+                const isCompleted = this.completedDays.has(date.toISOString().split('T')[0]);
+                
+                tooltip.textContent = `${monthName} ${dayOfMonth}, ${this.year}${isCompleted ? ' ✓' : ''}`;
+                tooltip.style.display = 'block';
+                tooltip.style.left = event.pageX + 10 + 'px';
+                tooltip.style.top = event.pageY - 30 + 'px';
+            }
+
+            hideTooltip() {
+                document.getElementById('tooltip').style.display = 'none';
+            }
+
+            showContextMenu(x, y, dateStr) {
+                const contextMenu = document.getElementById('contextMenu');
+                this.currentContextDay = dateStr;
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = x + 'px';
+                contextMenu.style.top = y + 'px';
+            }
+
+            undoDay() {
+                if (this.currentContextDay) {
+                    this.completedDays.delete(this.currentContextDay);
+                    const dayElement = document.querySelector(`[data-date="${this.currentContextDay}"]`);
+                    if (dayElement) {
+                        this.updateDayAppearance(dayElement);
+                    }
+                    this.updateStats();
+                    this.saveData();
+                    document.getElementById('contextMenu').style.display = 'none';
+                }
+            }
+
+            updateStats() {
+                const totalDays = this.isLeapYear(this.year) ? 366 : 365;
+                const completed = this.completedDays.size;
+                
+                // Total days
+                document.getElementById('totalDays').textContent = `${completed}/${totalDays}`;
+                
+                // Longest streak
+                document.getElementById('longestStreak').textContent = `${this.calculateLongestStreak()} days`;
+                
+                // This month
+                const currentMonth = new Date().getMonth();
+                const thisMonthCount = this.calculateMonthCount(currentMonth);
+                document.getElementById('currentMonth').textContent = thisMonthCount;
+                
+                // Weekly average
+                const weeklyAvg = Math.round((completed / 52) * 10) / 10;
+                document.getElementById('weeklyAverage').textContent = weeklyAvg;
+            }
+
+            calculateLongestStreak() {
+                if (this.completedDays.size === 0) return 0;
+                
+                const sortedDates = Array.from(this.completedDays).sort();
+                let maxStreak = 1;
+                let currentStreak = 1;
+                
+                for (let i = 1; i < sortedDates.length; i++) {
+                    const prevDate = new Date(sortedDates[i - 1]);
+                    const currentDate = new Date(sortedDates[i]);
+                    const dayDiff = (currentDate - prevDate) / (1000 * 60 * 60 * 24);
+                    
+                    if (dayDiff === 1) {
+                        currentStreak++;
+                        maxStreak = Math.max(maxStreak, currentStreak);
+                    } else {
+                        currentStreak = 1;
+                    }
+                }
+                
+                return maxStreak;
+            }
+
+            calculateMonthCount(month) {
+                let count = 0;
+                for (const dateStr of this.completedDays) {
+                    const date = new Date(dateStr);
+                    if (date.getMonth() === month && date.getFullYear() === this.year) {
+                        count++;
+                    }
+                }
+                return count;
+            }
+
+            isLeapYear(year) {
+                return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+            }
+
+            saveData() {
+                const data = {
+                    habitName: this.habitName,
+                    color: this.color,
+                    year: this.year,
+                    completedDays: Array.from(this.completedDays)
+                };
+                localStorage.setItem('habitTracker', JSON.stringify(data));
+            }
+
+            loadData() {
+                const saved = localStorage.getItem('habitTracker');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    this.habitName = data.habitName || this.habitName;
+                    this.color = data.color || this.color;
+                    this.year = data.year || this.year;
+                    this.completedDays = new Set(data.completedDays || []);
+                    
+                    // Update UI
+                    document.getElementById('habitName').value = this.habitName;
+                    document.getElementById('habitColor').value = this.color;
+                    document.getElementById('habitYear').value = this.year;
+                    document.getElementById('habitTitle').textContent = this.habitName;
+                    
+                    this.generateCalendar();
+                    this.updateStats();
+                }
+            }
+        }
+
+        // Global functions
+        function toggleSettings() {
+            const content = document.getElementById('settingsContent');
+            const toggle = document.getElementById('settingsToggle');
+            
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                content.classList.add('expanded');
+                toggle.textContent = 'Click to collapse';
+            } else {
+                content.classList.remove('expanded');
+                content.classList.add('collapsed');
+                toggle.textContent = 'Click to expand';
+            }
+        }
+
+        function exportData() {
+            const data = localStorage.getItem('habitTracker');
+            if (data) {
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'habit-tracker-data.json';
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            localStorage.setItem('habitTracker', JSON.stringify(data));
+                            location.reload();
+                        } catch (err) {
+                            alert('Invalid file format');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        function clearData() {
+            if (confirm('Are you sure you want to clear all data?')) {
+                localStorage.removeItem('habitTracker');
+                location.reload();
+            }
+        }
+
+        function undoDay() {
+            if (window.habitTracker) {
+                window.habitTracker.undoDay();
+            }
+        }
+
+        // Initialize the habit tracker
+        window.habitTracker = new HabitTracker();
+    </script>
+</body>
+</html>
