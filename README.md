@@ -10,4 +10,4 @@ A GitHub-style habit tracker widget for Notion.
 - Data export/import
 
 ## Usage
-Embed in Notion using: https://your-username.github.io/habit-tracker
+Embed in Notion using: https://lonelynaut.github.io/notion-habit-tracker
