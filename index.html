@@ -614,9 +614,13 @@
     <script>
         class HabitTracker {
             constructor() {
-                this.year = 2025;
-                this.habitName = 'Daily Exercise';
-                this.color = '#f85149';
+                // Get URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                this.habitId = urlParams.get('habit') || 'default';
+                
+                this.year = parseInt(urlParams.get('year')) || 2025;
+                this.habitName = urlParams.get('name') || 'Daily Exercise';
+                this.color = urlParams.get('color') || '#f85149';
                 this.completedDays = new Set();
                 this.currentContextDay = null;
                 
@@ -928,11 +932,11 @@
                     year: this.year,
                     completedDays: Array.from(this.completedDays)
                 };
-                localStorage.setItem('habitTracker', JSON.stringify(data));
+                localStorage.setItem(`habitTracker_${this.habitId}`, JSON.stringify(data));
             }
 
             loadData() {
-                const saved = localStorage.getItem('habitTracker');
+                const saved = localStorage.getItem(`habitTracker_${this.habitId}`);
                 if (saved) {
                     const data = JSON.parse(saved);
                     this.habitName = data.habitName || this.habitName;
@@ -969,13 +973,13 @@
         }
 
         function exportData() {
-            const data = localStorage.getItem('habitTracker');
+            const data = localStorage.getItem(`habitTracker_${window.habitTracker.habitId}`);
             if (data) {
                 const blob = new Blob([data], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'habit-tracker-data.json';
+                a.download = `habit-tracker-${window.habitTracker.habitId}-data.json`;
                 a.click();
                 URL.revokeObjectURL(url);
             }
@@ -992,7 +996,7 @@
                     reader.onload = (e) => {
                         try {
                             const data = JSON.parse(e.target.result);
-                            localStorage.setItem('habitTracker', JSON.stringify(data));
+                            localStorage.setItem(`habitTracker_${window.habitTracker.habitId}`, JSON.stringify(data));
                             location.reload();
                         } catch (err) {
                             alert('Invalid file format');
@@ -1006,7 +1010,7 @@
 
         function clearData() {
             if (confirm('Are you sure you want to clear all data?')) {
-                localStorage.removeItem('habitTracker');
+                localStorage.removeItem(`habitTracker_${window.habitTracker.habitId}`);
                 location.reload();
             }
         }
